@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSR Plotting Tool</title>
+    <link rel="icon" type="image/png" href="CL_Icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="centerline-white-rgb.svg" alt="CenterLine Logo" class="logo">
+            <h1>RSR® - Weld Data Plotting Tool</h1>
+            <p class="subtitle">Upload CSV weld data to generate interactive plots</p>
+        </header>
+
+        <main>
+            <!-- File Upload Zone -->
+            <div class="upload-section">
+                <div id="dropZone" class="drop-zone">
+                    <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p class="drop-text">Drag and drop your CSV file here</p>
+                    <p class="drop-text-or">or</p>
+                    <button id="browseBtn" class="browse-btn">Browse Files</button>
+                    <input type="file" id="fileInput" accept=".csv" hidden>
+                    <p class="file-info">Supported format: CSV with at least 3 columns (Time, Position, Force)</p>
+                </div>
+                <div id="fileName" class="file-name"></div>
+            </div>
+
+            <!-- Error Display -->
+            <div id="errorDisplay" class="error-display hidden"></div>
+
+            <!-- Success Message -->
+            <div id="successDisplay" class="success-display hidden"></div>
+
+            <!-- Metadata Table -->
+            <div id="metadataSection" class="metadata-section hidden">
+                <h2>Weld Metadata</h2>
+                <table id="metadataTable" class="metadata-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metadataBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Plot Container -->
+            <div id="plotSection" class="plot-section hidden">
+                <div id="plotContainer"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>RSR Plotting Tool | CenterLine (Windsor) Ltd.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
