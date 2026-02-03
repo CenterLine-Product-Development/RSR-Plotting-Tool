@@ -25,11 +25,11 @@
                         <polyline points="17 8 12 3 7 8"></polyline>
                         <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
-                    <p class="drop-text">Drag and drop your CSV file here</p>
+                    <p class="drop-text">Drag and drop your CSV file(s) here</p>
                     <p class="drop-text-or">or</p>
                     <button id="browseBtn" class="browse-btn">Browse Files</button>
-                    <input type="file" id="fileInput" accept=".csv" hidden>
-                    <p class="file-info">Supported format: CSV with at least 3 columns (Time, Position, Force)</p>
+                    <input type="file" id="fileInput" accept=".csv" multiple hidden>
+                    <p class="file-info">Supported format: CSV with at least 3 columns (Time, Position, Force). Multiple files supported.</p>
                 </div>
                 <div id="fileName" class="file-name"></div>
             </div>
@@ -40,24 +40,23 @@
             <!-- Success Message -->
             <div id="successDisplay" class="success-display hidden"></div>
 
-            <!-- Metadata Table -->
-            <div id="metadataSection" class="metadata-section hidden">
-                <h2>Weld Metadata</h2>
-                <table id="metadataTable" class="metadata-table">
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Value</th>
-                        </tr>
-                    </thead>
-                    <tbody id="metadataBody">
-                    </tbody>
-                </table>
-            </div>
+            <!-- Plot Area with Side Panel -->
+            <div id="plotArea" class="plot-area hidden">
+                <!-- Side Panel for File Management -->
+                <aside id="sidePanel" class="side-panel">
+                    <div class="side-panel-header">
+                        <h3>Loaded Files</h3>
+                        <button id="clearAllBtn" class="clear-all-btn" title="Remove all files">Clear All</button>
+                    </div>
+                    <div id="fileList" class="file-list">
+                        <!-- File cards will be dynamically added here -->
+                    </div>
+                </aside>
 
-            <!-- Plot Container -->
-            <div id="plotSection" class="plot-section hidden">
-                <div id="plotContainer"></div>
+                <!-- Plot Container -->
+                <div id="plotSection" class="plot-section">
+                    <div id="plotContainer"></div>
+                </div>
             </div>
         </main>
 
