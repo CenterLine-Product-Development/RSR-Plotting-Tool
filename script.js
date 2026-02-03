@@ -9,6 +9,7 @@ const plotArea = document.getElementById('plotArea');
 const sidePanel = document.getElementById('sidePanel');
 const fileList = document.getElementById('fileList');
 const clearAllBtn = document.getElementById('clearAllBtn');
+const addFilesBtn = document.getElementById('addFilesBtn');
 const plotSection = document.getElementById('plotSection');
 const plotContainer = document.getElementById('plotContainer');
 
@@ -32,6 +33,7 @@ const COLOR_PALETTE = [
 
 // Event Listeners
 browseBtn.addEventListener('click', () => fileInput.click());
+addFilesBtn.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', handleFileSelect);
 clearAllBtn.addEventListener('click', clearAllFiles);
 
@@ -236,6 +238,14 @@ function addFileToStorage(fileData, filename) {
 
 // Clear all files
 function clearAllFiles() {
+    if (loadedFiles.length === 0) {
+        return;
+    }
+    
+    if (!confirm(`Are you sure you want to remove all ${loadedFiles.length} file(s)?`)) {
+        return;
+    }
+    
     loadedFiles = [];
     fileIdCounter = 0;
     renderFileList();
@@ -407,7 +417,7 @@ function generatePlot(files) {
             },
             marker: { size: 3, color: file.color },
             yaxis: 'y1',
-            legendgroup: `file-${file.id}`,
+            legendgroup: 'position',
             showlegend: false,
             hovertemplate: `${shortName}<br>Position: %{y}<extra></extra>`
         };
@@ -425,7 +435,7 @@ function generatePlot(files) {
             },
             marker: { size: 3, color: file.color, symbol: 'square' },
             yaxis: 'y2',
-            legendgroup: `file-${file.id}`,
+            legendgroup: 'force',
             showlegend: false,
             hovertemplate: `${shortName}<br>Force: %{y}<extra></extra>`
         };
@@ -473,7 +483,8 @@ function generatePlot(files) {
                             color: regionColor,
                             width: 1
                         },
-                        layer: 'below'
+                        layer: 'below',
+                        visible: true
                     });
                 });
             }
@@ -495,7 +506,8 @@ function generatePlot(files) {
                             dash: 'dot'
                         },
                         opacity: 0.5,
-                        layer: 'below'
+                        layer: 'below',
+                        visible: true
                     });
                 });
             }
@@ -509,6 +521,7 @@ function generatePlot(files) {
         mode: 'lines',
         name: 'Position',
         line: { color: '#333', width: 2, dash: 'solid' },
+        legendgroup: 'position',
         showlegend: true,
         hoverinfo: 'skip'
     });
@@ -520,6 +533,7 @@ function generatePlot(files) {
         name: 'Force',
         line: { color: '#333', width: 2, dash: 'dash' },
         yaxis: 'y2',
+        legendgroup: 'force',
         showlegend: true,
         hoverinfo: 'skip'
     });
@@ -539,20 +553,30 @@ function generatePlot(files) {
                     width: 1
                 }
             },
+            legendgroup: 'weld-active',
             showlegend: true,
             hoverinfo: 'skip'
         });
     }
     
     // Add filename annotations at the bottom, color-coded per file
+    // For many files, display on multiple rows to prevent cutoff
+    const maxFilesPerRow = 6;
     let xOffset = 0.01;
+    let rowNumber = 0;
+    
     files.forEach((file, index) => {
+        if (index > 0 && index % maxFilesPerRow === 0) {
+            rowNumber++;
+            xOffset = 0.01;
+        }
+        
         annotations.push({
             text: file.filename,
             xref: 'paper',
             yref: 'paper',
             x: xOffset,
-            y: -0.12,
+            y: -0.18 - (rowNumber * 0.03),
             xanchor: 'left',
             yanchor: 'bottom',
             showarrow: false,
@@ -563,8 +587,12 @@ function generatePlot(files) {
             opacity: 0.9
         });
         // Approximate spacing based on filename length
-        xOffset += (file.filename.length * 0.005) + 0.02;
+        xOffset += Math.min((file.filename.length * 0.005) + 0.02, 0.16);
     });
+    
+    // Adjust bottom margin based on number of rows needed
+    const numRows = Math.ceil(files.length / maxFilesPerRow);
+    const bottomMargin = 120 + (numRows > 1 ? (numRows - 1) * 25 : 0);
     
     // Layout configuration
     const layout = {
@@ -608,7 +636,7 @@ function generatePlot(files) {
             l: 60,
             r: 60,
             t: 80,
-            b: 100
+            b: bottomMargin
         },
         autosize: true
     };
@@ -636,6 +664,26 @@ function generatePlot(files) {
     setTimeout(() => {
         Plotly.newPlot(plotContainer, traces, layout, config).then(() => {
             Plotly.Plots.resize(plotContainer);
+            
+            // Add event listener for legend clicks to toggle weld region shapes
+            plotContainer.on('plotly_legendclick', function(data) {
+                if (data.curveNumber !== undefined) {
+                    const clickedTrace = traces[data.curveNumber];
+                    if (clickedTrace && clickedTrace.legendgroup === 'weld-active') {
+                        // Toggle visibility of all shapes (weld regions and transition lines)
+                        const currentLayout = plotContainer.layout;
+                        const updatedShapes = currentLayout.shapes.map(shape => {
+                            return {
+                                ...shape,
+                                visible: !shape.visible
+                            };
+                        });
+                        
+                        Plotly.relayout(plotContainer, { shapes: updatedShapes });
+                        return false; // Prevent default legend behavior
+                    }
+                }
+            });
         });
     }, 10);
 }
