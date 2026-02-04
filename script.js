@@ -316,7 +316,10 @@ function renderFileList() {
         
         card.innerHTML = `
             <div class="file-card-header">
-                <span class="file-color-indicator" style="background-color: ${file.color}"></span>
+                <span class="file-color-indicator" style="background-color: ${file.color}" 
+                    onclick="openColorPicker(${file.id})" title="Click to change color"></span>
+                <input type="color" id="color-picker-${file.id}" style="display: none;" 
+                    value="${file.color}" onchange="updateFileColor(${file.id}, this.value)">
                 <input type="checkbox" class="file-checkbox" ${file.visible ? 'checked' : ''} 
                     onchange="toggleFileVisibility(${file.id})" title="Show/hide on plot">
                 <span class="file-card-name" title="${escapeHtml(file.filename)}">${escapeHtml(file.filename)}</span>
@@ -333,6 +336,24 @@ function renderFileList() {
         
         fileList.appendChild(card);
     });
+}
+
+// Open color picker for a specific file
+function openColorPicker(fileId) {
+    const colorInput = document.getElementById(`color-picker-${fileId}`);
+    if (colorInput) {
+        colorInput.click();
+    }
+}
+
+// Update file color and refresh plot
+function updateFileColor(fileId, newColor) {
+    const file = loadedFiles.find(f => f.id === fileId);
+    if (file) {
+        file.color = newColor;
+        renderFileList();
+        updatePlot();
+    }
 }
 
 // Escape HTML to prevent XSS
